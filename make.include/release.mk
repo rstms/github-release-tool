@@ -24,10 +24,14 @@ dist/$(project)-$(version)-release.json: dist/$(project)-$(version)-*.whl
 	$(RELEASE) upload --force | tee -a $*
 
 ## create a github release from the current version
-release: dist/$(project)-$(version)-release.json
+release: .release
+	
+.release: dist/$(project)-$(version)-release.json
+	@touch $@
 
 # clean up the publish temp files
 release-clean:
 	rm -f .dist
+	rm -f .release
 	rm -rf .tox
 	rm -f requirements*.txt
