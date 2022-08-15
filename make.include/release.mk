@@ -23,9 +23,10 @@ dist/$(project)-$(version)-*.whl: dist
 
 dist/$(project)-$(version)-release.json: dist/$(project)-$(version)-*.whl
 	@echo pushing Release $(project) v$(version) to github...
-	release --organization $(organization) --repository $(repo) --token $(GITHUB_DEPLOY_TOKEN) \
-	  --module-dir $(MODULE_DIR) --wheel-dir $(./dist)
-	  create --version $(version) --branch $(branch) $< >$@
+	release --force  --organization $(organization) --repository $(repo) --token $(GITHUB_DEPLOY_TOKEN) \
+	  --module-dir $(MODULE_DIR) --wheel-dir ./dist
+	  create --version $(version) --branch $(branch) $< | tee $@
+	release --force upload | tee -a $*
 
 ## create a github release from the current version
 release: dist/$(project)-$(version)-release.json
