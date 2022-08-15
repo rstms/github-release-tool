@@ -213,7 +213,7 @@ class Release:
     def download_assets(self, _id, regex, path, dry_run):
         """download the assets from the selected remote release"""
         ret = []
-        path=path.resolve()
+        path = path.resolve()
         release = self._get_repo_release()
         for asset in release.assets():
             if _id and asset.id != _id:

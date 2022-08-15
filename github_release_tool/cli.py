@@ -1,7 +1,6 @@
 """Console script for github_release_tool."""
 
 import json
-import re
 import sys
 from pathlib import Path
 
@@ -163,9 +162,9 @@ def download_asset(ctx, _id, regex, path, dry_run):
 
 @cli.command()
 @click.argument("repo-path", type=str)
-@click.argument("output", type=click.File('wb'), default='-')
+@click.argument("output", type=click.File("wb"), default="-")
 @click.pass_context
-def download_file(ctx, repo_path, output): 
+def download_file(ctx, repo_path, output):
     """output the contents of a repo file"""
     r = ctx.obj
     return r.download_file(repo_path, output)
