@@ -2,6 +2,7 @@
 
 # remove module from the local python environment
 uninstall: 
+	pip install --upgrade pip flit wheel
 	pip uninstall -yqq $(project)
 
 # install to the local environment from the source directory
