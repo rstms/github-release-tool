@@ -2,9 +2,10 @@
 
 """Tests for `github_release_tool` package."""
 
+from logging import debug, info
+
 import pytest
 from click.testing import CliRunner
-from logging import info, debug
 
 import github_release_tool
 from github_release_tool import cli
@@ -13,6 +14,7 @@ from github_release_tool import cli
 @pytest.fixture
 def runner():
     runner = CliRunner()
+
     def _runner(*args, **kwargs):
         _args = tuple([cli] + list(args))
         debug(f"cli({_args[1:]}, {kwargs})")
@@ -21,7 +23,9 @@ def runner():
         debug(result.output)
         debug(f"{result}")
         return result
+
     return _runner
+
 
 def test_version():
     """Test reading version and module name"""
@@ -45,13 +49,17 @@ def test_cli():
 
 
 def test_cli_list(runner):
-    runner('list')
-    runner('-l list')
-    
+    ret = runner("list")
+    info(ret)
+    ret = runner("-l list")
+    info(ret)
+
+
 def test_cli_latest(runner):
-    runner('latest')
-    runner('-l', 'latest')
+    runner("latest")
+    runner("-l", "latest")
+
 
 def test_cli_get(runner):
-    runner('get')
-    runner('-l', 'get')
+    runner("get")
+    runner("-l", "get")

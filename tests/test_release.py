@@ -1,8 +1,7 @@
 import os
-from logging import debug
+from logging import debug, info
 from pathlib import Path
 from pprint import pformat
-from logging import info, debug
 
 import pytest
 
@@ -29,6 +28,7 @@ def args(module_dir, wheel_dir):
         wheel_dir=wheel_dir,
     )
 
+
 @pytest.fixture
 def mkrelease(args):
     def _release(**kwargs):
@@ -42,6 +42,7 @@ def mkrelease(args):
 
     return _release
 
+
 def test_release_list_local(mkrelease):
     r = mkrelease(local=True)
     ret = r.list_release_versions()
@@ -49,6 +50,7 @@ def test_release_list_local(mkrelease):
     assert len(ret)
     assert isinstance(ret[0], str)
     info(ret)
+
 
 def test_release_list_remote(mkrelease):
     r = mkrelease()
@@ -65,11 +67,13 @@ def test_release_latest_local(mkrelease):
     assert isinstance(ret, str)
     info(ret)
 
+
 def test_release_latest_remote(mkrelease):
     r = mkrelease()
     ret = r.latest_release_version()
     assert isinstance(ret, str)
     info(ret)
+
 
 def test_release_sort(mkrelease):
     r = mkrelease()
@@ -88,6 +92,7 @@ def test_release_sort(mkrelease):
     debug(pformat({"after": after}))
     assert after[-1] == "11.3.1"
 
+
 def test_release_get(mkrelease):
     r = mkrelease()
     ret = r.get_release_data()
@@ -95,7 +100,9 @@ def test_release_get(mkrelease):
     assert isinstance(ret, dict)
     info(pformat(ret))
 
-TEST_VERSION='0.0.6'
+
+TEST_VERSION = "0.0.6"
+
 
 def test_release_check_version(mkrelease):
     r = mkrelease()
@@ -104,12 +111,12 @@ def test_release_check_version(mkrelease):
     assert ret1
 
     with pytest.raises(TypeError):
-        ret2 = r._check_version(None)
+        r._check_version(None)
 
     with pytest.raises(SyntaxError):
-        ret3 = r._check_version('foo')
+        r._check_version("foo")
 
-    ret4 = r._check_version('0.0.0')
+    ret4 = r._check_version("0.0.0")
     assert ret4
 
 
@@ -118,12 +125,14 @@ def test_release_local_release_files_wheel(mkrelease):
     ret = r.local_release_files(wheel=True)
     assert isinstance(ret, dict)
     info(ret)
-    
+
+
 def test_release_local_release_files_json(mkrelease):
     r = mkrelease()
     ret = r.local_release_files()
     assert isinstance(ret, dict)
     info(ret)
+
 
 def test_release_wheel(mkrelease):
     r = mkrelease()
@@ -131,17 +140,20 @@ def test_release_wheel(mkrelease):
     assert isinstance(ret, str)
     info(ret)
 
+
 def test_release_get_current_branch(mkrelease):
     r = mkrelease()
     ret = r.get_current_branch()
     assert isinstance(ret, str)
-    assert ret=='master'
+    assert ret == "master"
+
 
 def test_release_get_assets(mkrelease):
     r = mkrelease()
     ret = r.get_assets()
     assert isinstance(ret, list)
     info(ret)
+
 
 def test_release_local_release_versions(mkrelease):
     r = mkrelease()
