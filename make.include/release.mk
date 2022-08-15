@@ -8,7 +8,7 @@ dist: .dist requirements.txt
 	flit build
 	@touch $@
 
-RELEASE := release\
+RELEASE = release\
   --organization $(organization)\
   --repository $(repo)\
   --token $(GITHUB_DEPLOY_TOKEN)\
@@ -16,18 +16,16 @@ RELEASE := release\
   --wheel-dir ./dist\
   --version $(version) 
 
-dist/$(project)-$(version)-*.whl: dist
-
-dist/$(project)-$(version)-release.json: dist/$(project)-$(version)-*.whl
-	@echo pushing Release $(project) v$(version) to github...
-	$(RELEASE) create --force | tee $@
-	$(RELEASE) upload --force | tee -a $*
-
 ## create a github release from the current version
+.PHONY: release
 release: .release
-	
-.release: dist/$(project)-$(version)-release.json
+
+.release: dist
+	@echo pushing Release $(project) v$(version) to github...
+	$(RELEASE) create --force | tee dist/$(project)-$(version)-release.json
+	$(RELEASE) upload --force | tee dist/$(project)-$(version)-asset.json
 	@touch $@
+
 
 # clean up the publish temp files
 release-clean:
