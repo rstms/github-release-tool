@@ -1,6 +1,6 @@
 github-release-tool
 ===================
-CLI using github3.py for github api release tasks
+CLI using github3.py for github API release tasks
 
 ![Image](https://img.shields.io/github/license/rstms/github-release-tool)
 
