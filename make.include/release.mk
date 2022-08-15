@@ -2,7 +2,7 @@
 
 # create distributable files if sources have changed
 .PHONY: dist 
-dist: .dist requirements.txt
+dist: .dist 
 .dist:	gitclean tox
 	@echo Building $(project)
 	flit build
