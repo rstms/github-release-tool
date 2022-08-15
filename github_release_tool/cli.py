@@ -31,7 +31,6 @@ def output_setup(_json=True, _compact=False, _func=print):
 
 
 @click.group("release")
-@click.version_option(message=header)
 @click.option("-d", "--debug", is_flag=True, help="debug mode")
 @click.option(
     "-j/-J",
@@ -140,41 +139,36 @@ def latest(ctx):
 @cli.command()
 @click.pass_context
 def assets(ctx):
-    """list assets for selected version or latest release"""
+    """list asset data for selected version or latest release"""
     r = ctx.obj
-    for asset in r.get_assets():
-        r.output(asset.as_dict())
-    return 0
+    return r.output(r.get_assets())
 
 
 @cli.command()
 @click.pass_context
 @click.option("-i", "--id", "_id", type=int)
 @click.option("-r", "--regex", type=str)
+@click.option("-d", "--dry-run", is_flag=True)
 @click.argument(
     "path",
     type=click.Path(
         exists=True, file_okay=False, writable=True, path_type=Path
     ),
 )
-def download(ctx, _id, regex, path):
+def download_asset(ctx, _id, regex, path, dry_run):
     """download asset with id to path"""
-
     r = ctx.obj
-    ret = {}
+    return r.output(r.download_assets(_id, regex, path, dry_run))
 
-    release = r.get_release_data()
 
-    for asset in release.assets():
-        if _id and asset.id != _id:
-            continue
-        elif regex and not re.match(regex, asset.name):
-            continue
-        else:
-            path = path / asset.name
-            ret[asset.name] = asset.download(path)
-
-    return r.output(ret)
+@cli.command()
+@click.argument("repo-path", type=str)
+@click.argument("output", type=click.File('wb'), default='-')
+@click.pass_context
+def download_file(ctx, repo_path, output): 
+    """output the contents of a repo file"""
+    r = ctx.obj
+    return r.download_file(repo_path, output)
 
 
 @cli.command()

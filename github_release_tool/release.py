@@ -210,6 +210,33 @@ class Release:
         release = self._get_repo_release()
         return [asset.as_dict() for asset in release.assets()]
 
+    def download_assets(self, _id, regex, path, dry_run):
+        """download the assets from the selected remote release"""
+        ret = []
+        path=path.resolve()
+        release = self._get_repo_release()
+        for asset in release.assets():
+            if _id and asset.id != _id:
+                continue
+            elif regex and not re.match(regex, asset.name):
+                continue
+            asset_path = path / asset.name
+            if dry_run:
+                result = asset_path
+            else:
+                result = asset.download(asset_path)
+            ret.append(str(result))
+
+        return ret
+
+    def download_file(self, repo_path, output_file):
+        """download the contents of a repo file and write to output_file"""
+        release = self._get_repo_release()
+        ref = release.tag_name
+        output_file.write(self.repo.file_contents(repo_path, ref).decoded)
+        output_file.close()
+        return 0
+
     def wheel(self):
         """return the filename of the selected wheel"""
         return str(self._get_wheel())
