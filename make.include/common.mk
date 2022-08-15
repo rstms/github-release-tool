@@ -1,6 +1,7 @@
 # common - initialization, variables, functions
 
 project = github_release_tool
+repo = github-release-tool
 organization = rstms
 branch != git branch | awk '/\*/{print $$2}'
 version != awk <$(project)/version.py -F\" '/^__version__/{print $$2}'

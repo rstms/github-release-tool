@@ -1,5 +1,8 @@
 # top-level Makefile 
 
+testo:
+	echo project=$(project)
+
 # remove module from the local python environment
 uninstall: 
 	pip install --upgrade pip flit wheel

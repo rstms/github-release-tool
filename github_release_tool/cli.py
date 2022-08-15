@@ -1,7 +1,6 @@
 """Console script for github_release_tool."""
 
 import json
-import os
 import re
 import sys
 from pathlib import Path
@@ -35,11 +34,11 @@ def output_setup(_json=True, _compact=False, _func=print):
 @click.version_option(message=header)
 @click.option("-d", "--debug", is_flag=True, help="debug mode")
 @click.option(
-    "-j/-t",
-    "--json/--text",
+    "-j/-J",
+    "--json/--no-json",
     is_flag=True,
     default=True,
-    help="output json or text",
+    help="format output as json",
 )
 @click.option(
     "-c",
@@ -54,36 +53,50 @@ def output_setup(_json=True, _compact=False, _func=print):
     help="select release version tag",
 )
 @click.option(
-    "-T", "--token", type=str, envvar="GITHUB_DEPLOY_TOKEN", show_envvar=True
+    "-t", "--token", type=str, envvar="GITHUB_DEPLOY_TOKEN", show_envvar=True
 )
 @click.option(
     "-o",
-    "--org",
+    "--organization",
     type=str,
-    envvar="GITHUB_ORGANIZATION",
+    envvar="GITHUB_ORG",
     show_envvar=True,
+    help="github organization name",
 )
 @click.option(
-    "-p",
-    "--project",
+    "-r",
+    "--repository",
     type=str,
     envvar="GITHUB_REPO",
     show_envvar=True,
-    help="github repo name",
+    help="github repository name",
 )
 @click.option(
-    "-R",
-    "--repo_root",
-    type=str,
-    envvar="REPO_ROOT",
+    "-m",
+    "--module-dir",
+    type=click.Path(
+        exists=True, file_okay=False, writable=True, path_type=Path
+    ),
+    envvar="MODULE_DIR",
     show_envvar=True,
-    help="local repo root dir",
+    help="python module directory",
 )
 @click.option(
-    "-r/-l",
-    "--remote/--local",
+    "-w",
+    "--wheel-dir",
+    type=click.Path(
+        exists=True, file_okay=False, writable=True, path_type=Path
+    ),
+    envvar="WHEEL_DIR",
+    default="./dist",
+    show_envvar=True,
+    help="wheel directory (usually ./dist)",
+)
+@click.option(
+    "-l",
+    "--local",
     is_flag=True,
-    help="select remote (github) / local releases",
+    help="select local release data",
 )
 @click.pass_context
 def cli(ctx, debug, json, compact, **kwargs):
@@ -98,10 +111,6 @@ def cli(ctx, debug, json, compact, **kwargs):
             click.echo(f"{exception_type.__name__}: {exception}", err=True)
 
     sys.excepthook = exception_handler
-
-    # support some alternatives for env vars
-    kwargs.setdefault("token", os.environ["GITHUB_TOKEN"])
-    kwargs.setdefault("project", os.environ["PROJECT"])
 
     ctx.obj = Release(**kwargs)
     ctx.obj.output = output_setup(json, compact, click.echo)
@@ -176,12 +185,38 @@ def wheel(ctx):
     return r.output(r.wheel())
 
 
+def verify_upload(args):
+    click.echo("Upload asset file:", err=True)
+    for k, v in args.items():
+        click.echo(f"{k}={v}")
+    click.confirm("confirm", abort=True, err=True)
+    return True
+
+
 @cli.command()
+@click.option(
+    "-c",
+    "--content-type",
+    type=str,
+    help="content-type",
+)
+@click.option("-l", "--label", type=str, help="short description")
+@click.option("-f", "--force", is_flag=True, help="bypass confirmation prompt")
+@click.argument(
+    "asset",
+    type=click.Path(exists=True, dir_okay=False, path_type=Path),
+    default=None,
+    required=False,
+)
 @click.pass_context
-def upload(ctx):
-    """upload wheel file to github"""
+def upload(ctx, content_type, label, force, asset):
+    """upload asset file to release"""
     r = ctx.obj
-    return r.output(r.upload())
+    if force:
+        verify = None
+    else:
+        verify = verify_upload
+    return r.output(r.upload_asset(asset, content_type, label, verify))
 
 
 @cli.command()
@@ -197,6 +232,39 @@ def get(ctx, key):
         data = data.get(key, None)
 
     return r.output(data)
+
+
+def verify_create(args):
+    click.echo("create release:", err=True)
+    for k, v in args.items():
+        click.echo(f"{k}={v}", err=True)
+    click.confirm("confirm", abort=True, err=True)
+    return True
+
+
+@cli.command()
+@click.option("-t", "--tag-name", type=str, help="tag name")
+@click.option(
+    "-c",
+    "--target-commitish",
+    type=str,
+    help="target commitish (branch or commit)",
+)
+@click.option("-n", "--name", type=str, help="release name")
+@click.option("-b", "--body", type=str, help="body text for release")
+@click.option("-d", "--draft", is_flag=True, help="draft mode switch")
+@click.option(
+    "-p", "--prerelease", is_flag=True, help="prerelease mode switch"
+)
+@click.option("-f", "--force", is_flag=True, help="bypass confirmation prompt")
+@click.pass_context
+def create(ctx, **kwargs):
+    """create a new release"""
+    r = ctx.obj
+    if not kwargs.pop("force", False):
+        kwargs["verify"] = verify_create
+    kwargs = {k: v for k, v in kwargs.items() if v}
+    return r.output(r.create_release(**kwargs))
 
 
 if __name__ == "__main__":

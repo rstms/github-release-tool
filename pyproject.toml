@@ -3,8 +3,6 @@ requires = ["flit_core >=3.2,<4"]
 build-backend = "flit_core.buildapi"
 requires_python = ">=3.8"
 
-
-
 [project]
 name = "github_release_tool"
 authors = [{name = "Matt Krueger", email = "mkrueger@rstms.net"}]
@@ -44,7 +42,7 @@ docs = [
 ]
 
 [project.urls]
-Home = "https://github.com/rstms/github_release_tool"
+Home = "https://github.com/rstms/github-release-tool"
 [tool.black]
 line-length = 79
 

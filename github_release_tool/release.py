@@ -16,23 +16,35 @@ JSON_PATTERN = r"^([a-z][a-z0-9_]+)-([0-9]+\.[0-9]+\.[0-9]+)-release\.json$"
 
 class Release:
     def __init__(
-        self, *, org, project, token, version=None, remote=True, repo_root="."
+        self,
+        *,
+        organization,
+        repository,
+        token,
+        module_dir,
+        wheel_dir,
+        version=None,
+        local=False,
     ):
         self.version_pattern = re.compile(VERSION_PATTERN)
         self.wheel_pattern = re.compile(WHEEL_PATTERN)
         self.json_pattern = re.compile(JSON_PATTERN)
         self.gh = github3.GitHub(token=token)
         if not isinstance(self.gh, github3.GitHub):
-            raise RuntimeError("GitHub login failed")
-        self.repo = self.gh.repository(org, project)
+            raise RuntimeError("token login failed")
+        self.repo = self.gh.repository(organization, repository)
         if not isinstance(self.repo, github3.repos.repo.Repository):
-            raise RuntimeError("GitHub repo lookup")
-        self.repo_root = Path(repo_root)
-        self.dist_dir = self.repo_root / "dist"
-        self.remote = remote
+            raise RuntimeError(
+                f"repo lookup failed: {organization}/{repository}"
+            )
+        self.module_dir = Path(module_dir).resolve()
+        self.module = self.module_dir.name
+        self.wheel_dir = Path(wheel_dir).resolve()
+        self.local = local
         if version in [None, "latest"]:
-            version = self.latest_release_version()
-        self.version = self._check_version(version)
+            self.version = self.latest_release_version()
+        else:
+            self.version = self._check_version(version)
 
     def _check_version(self, v):
         if v is not None:
@@ -40,31 +52,25 @@ class Release:
                 v = v[1:]
             if not self.version_pattern.match(v):
                 raise SyntaxError(f"unrecognized version format '{v}'")
+        if not isinstance(v, str):
+            raise TypeError(f"expected string-type, got '{v}'")
         return v
 
-    def _dist_files(self):
-        return [e for e in self.dist_dir.iterdir() if e.is_file()]
-
-    def _filter_dist_files(self, pattern):
-        ret = {}
-        for _file in self._dist_files():
-            match = pattern.match(_file.name)
-            repo, version = match.groups()[:1]
-            if repo == self.repo:
-                ret[self._check_version(version)] = _file
-        return ret
-
-    def _repo_release_versions(self):
-        return [self._check_version(r.tag_name) for r in self.repo.releases()]
-
-    def _local_release_versions(self, wheel=False):
-        """return dict of json files from ./dist"""
+    def local_release_files(self, wheel=False):
+        """return dict of json or wheel files from ./dist"""
         if wheel:
             pattern = self.wheel_pattern
         else:
             pattern = self.json_pattern
 
-        return self._filter_dist_files(pattern)
+        ret = {}
+        for _file in [e for e in self.wheel_dir.iterdir() if e.is_file()]:
+            match = pattern.match(_file.name)
+            if match:
+                module, version = match.groups()[:2]
+                if module == self.module_dir.name:
+                    ret[self._check_version(version)] = _file
+        return ret
 
     def _sort_versions(self, versions):
         """sort a list of semver strings"""
@@ -72,45 +78,58 @@ class Release:
         for v in versions:
             code = "".join([f"{int(s):08x}" for s in v.split(".")])
             key[code] = v
-        return [key[code] for code in sorted(key.keys())]
+        ret = [key[code] for code in sorted(key.keys())]
+        return list(ret)
 
-    def latest_release_version(self):
-        if self.remote:
+    def latest_release_version(self, local=False):
+        ret = None
+        if self.local or local:
+            versions = self.local_release_versions()
+            if len(versions) > 0:
+                versions = self._sort_versions(versions)
+                ret = versions[-1]
+        else:
             releases = self.repo.releases()
             if len(list(releases)):
-                v = self.repo.latest_release().tag_name
-            else:
-                v = None
-        else:
-            releases = self._local_release_versions(wheel=True)
-            versions = self._sort_versions(releases.keys())
-            if versions:
-                v = versions[0]
-            else:
-                v = None
-        return self._check_version(v)
+                release = self.repo.latest_release()
+                if release:
+                    ret = release.tag_name
+        if ret:
+            ret = self._check_version(ret)
 
-    def get_release_data(self, v):
-        v = self._check_version(v)
-        if self.remote:
-            return self.repo.release_from_tag("v" + v).as_dict()
+        return ret
+
+    def get_release_data(self):
+        v = self.version
+        if self.local:
+            releases = self.local_release_files()
+            if v in releases:
+                _file = releases[v]
+                return json.loads(Path(_file).read_text())
         else:
-            releases = self._local_release_versions()
-            _file = releases[v]
-            return json.loads(Path(_file).read_text())
+            return self._get_repo_release().as_dict()
+        return None
+
+    def local_release_versions(self):
+        """return list of versions of local wheel files"""
+        wheels = self.local_release_files(wheel=True)
+        versions = list(wheels.keys())
+        return versions
 
     def list_release_versions(self, sorted=True):
-        if self.remote:
-            ret = self._release_versions()
+        if self.local:
+            ret = self.local_release_versions()
         else:
-            ret = self._dist_versions().keys()
+            ret = [
+                self._check_version(r.tag_name) for r in self.repo.releases()
+            ]
 
         if sorted:
             ret = self._sort_versions(ret)
 
         return ret
 
-    def get_current_branch():
+    def get_current_branch(self):
         out = check_output("git branch | awk '/^\\*/{print $2}'", shell=True)
         branch = out.decode().strip()
         return branch
@@ -118,41 +137,77 @@ class Release:
     def create_release(self, **kwargs):
         """create a new release"""
 
-        version = kwargs.pop("version", self.latest_release_version())
+        ret = None
+
+        version = kwargs.pop(
+            "version", self.latest_release_version(local=True)
+        )
 
         kwargs.setdefault("tag_name", f"v{version}")
-        kwargs.setdefault("target_commitish", self.get_current_branch)
+        kwargs.setdefault("target_commitish", self.get_current_branch())
         kwargs.setdefault("name", f"v{version}")
         kwargs.setdefault("body", f"Release of version v{version}")
         kwargs.setdefault("draft", False)
         kwargs.setdefault("prerelease", False)
 
         verify = kwargs.pop("verify", None)
-        if verify and not verify(kwargs):
-            return None
-        else:
-            return self.repo.create_release(**kwargs)
+        if not verify or verify(kwargs):
+            release = self.repo.create_release(**kwargs)
+            if release:
+                ret = release.as_dict()
+        return ret
 
-    def upload_asset(self, asset_file=None, verify=None):
+    def _get_wheel(self):
+        wheel = self.local_release_files(wheel=True)[self.version]
+        wheel = wheel.resolve()
+        return wheel
+
+    def _get_repo_release(self):
+        """return current remote release"""
+        release = self.repo.release_from_tag(f"v{self.version}")
+        if not release:
+            RuntimeError(f"unknown release: {self.version}")
+        return release
+
+    def upload_asset(
+        self, asset=None, content_type=None, label=None, verify=None
+    ):
         """upload a binary asset to release"""
+        release = self._get_repo_release()
 
-        version = self.version
+        if not asset:
+            asset = self._get_wheel()
+        asset = asset.resolve()
 
-        release = self.repo.release_from_tag(f"v{version}")
+        content_type = content_type or "application/binary"
 
-        asset_file = (
-            asset_file or self.local_release_versions(wheel=True)[version]
-        )
-        asset_file = asset_file.resolve()
-
-        if verify and not verify(dict(version=version, asset=asset_file)):
-            return None
-        else:
-            with asset_file.open("rb") as ifp:
-                return release.upload_asset(
-                    content_type="application/binary", name=ifp.name, asset=ifp
+        if verify:
+            verify(
+                dict(
+                    release=release.tag_name,
+                    content_type=content_type,
+                    label=label,
+                    asset=str(asset),
                 )
+            )
+
+        with asset.open("rb") as ifp:
+            response = release.upload_asset(
+                content_type=content_type,
+                name=ifp.name,
+                asset=ifp,
+                label=label,
+            )
+            if response:
+                return response.as_dict()
+
+        return None
 
     def get_assets(self):
-        release = self.repo.release_from_tag(f"v{self.version}")
-        return release.assets
+        """return the assets from the selected remote release"""
+        release = self._get_repo_release()
+        return [asset.as_dict() for asset in release.assets()]
+
+    def wheel(self):
+        """return the filename of the selected wheel"""
+        return str(self._get_wheel())
