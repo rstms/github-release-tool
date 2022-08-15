@@ -7,7 +7,7 @@ import re
 from pathlib import Path
 from subprocess import check_output
 
-from github3 import GitHub
+import github3
 
 VERSION_PATTERN = r"^([0-9]+)\.([0-9]+)\.([0-9]+)(-.*){0,1}$"
 WHEEL_PATTERN = r"^([a-z][a-z0-9_]+)-([0-9]+\.[0-9]+\.[0-9]+)-.+\.whl$"
@@ -21,22 +21,25 @@ class Release:
         self.version_pattern = re.compile(VERSION_PATTERN)
         self.wheel_pattern = re.compile(WHEEL_PATTERN)
         self.json_pattern = re.compile(JSON_PATTERN)
-        self.gh = GitHub(token=token)
+        self.gh = github3.GitHub(token=token)
+        if not isinstance(self.gh, github3.GitHub):
+            raise RuntimeError('GitHub login failed')
         self.repo = self.gh.repository(org, project)
+        if not isinstance(self.repo, github3.repos.repo.Repository):
+            raise RuntimeError('GitHub repo lookup')
         self.repo_root = Path(repo_root)
         self.dist_dir = self.repo_root / "dist"
         self.remote = remote
-        if version in [None, 'latest']:
+        if version in [None, "latest"]:
             version = self.latest_release_version()
         self.version = self._check_version(version)
 
     def _check_version(self, v):
-        v = str(v)
-        if v.startswith("v"):
-            v = v[1:]
-        if not self.version_pattern.match(v):
-            breakpoint()
-            raise SyntaxError(f"unrecognized version format '{v}'")
+        if v is not None:
+            if v.startswith("v"):
+                v = v[1:]
+            if not self.version_pattern.match(v):
+                raise SyntaxError(f"unrecognized version format '{v}'")
         return v
 
     def _dist_files(self):
@@ -73,7 +76,11 @@ class Release:
 
     def latest_release_version(self):
         if self.remote:
-            v = self.repo.latest_release().tag_name
+            releases = self.repo.releases()
+            if len(list(releases)):
+                v = self.repo.latest_release().tag_name
+            else:
+                v = None
         else:
             releases = self._local_release_versions(wheel=True)
             versions = self._sort_versions(releases.keys())
