@@ -2,9 +2,9 @@ github-release-tool
 ===================
 
 
-![Image](https://img.shields.io/github/license/rstms/github_release_tool)
+![Image](https://img.shields.io/github/license/rstms/github-release-tool)
 
-![Image](https://img.shields.io/pypi/v/github_release_tool.svg)
+![Image](https://img.shields.io/pypi/v/github-release-tool.svg)
 
 
 
