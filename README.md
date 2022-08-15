@@ -1,6 +1,6 @@
 github-release-tool
 ===================
-
+CLI using github3.py for github api release tasks
 
 ![Image](https://img.shields.io/github/license/rstms/github-release-tool)
 
@@ -8,18 +8,12 @@ github-release-tool
 
 
 
-
-
-CLI using github3.py for github api release tasks
-
-
 * Free software: MIT license
 * Documentation: https://github-release-tool.readthedocs.io.
 
 
 
-Credits
--------
+### Credits
 
 This package was created with Cookiecutter and `rstms/cookiecutter-python-cli`, a fork of the `audreyr/cookiecutter-pypackage` project template.
 
