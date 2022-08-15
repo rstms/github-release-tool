@@ -1,9 +1,11 @@
 # publish - build package and publish
 
 # create distributable files if sources have changed
+
 .PHONY: dist 
-dist: .dist 
-.dist:	gitclean tox
+dist: gitclean tox .dist 
+
+.dist:
 	@echo Building $(project)
 	flit build
 	@touch $@
