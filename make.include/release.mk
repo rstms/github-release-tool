@@ -8,25 +8,20 @@ dist: .dist requirements.txt
 	flit build
 	@touch $@
 
-release_args = '{\
-  "tag_name": "v$(version)",\
-  "target_commitish": "$(branch)",\
-  "name": "v$(version)",\
-  "body": "Release of version $(version)",\
-  "draft": false,\
-  "prerelease": false\
-}'
-release_url = https://api.github.com/repos/$(organization)/$(repo)/releases
-release_header = -H 'Authorization: token ${GITHUB_DEPLOY_TOKEN}'
+RELEASE := release\
+  --organization $(organization)\
+  --repository $(repo)\
+  --token $(GITHUB_DEPLOY_TOKEN)\
+  --module-dir $(MODULE_DIR)\
+  --wheel-dir ./dist\
+  --version $(version) 
 
 dist/$(project)-$(version)-*.whl: dist
 
 dist/$(project)-$(version)-release.json: dist/$(project)-$(version)-*.whl
 	@echo pushing Release $(project) v$(version) to github...
-	release --force  --organization $(organization) --repository $(repo) --token $(GITHUB_DEPLOY_TOKEN) \
-	  --module-dir $(MODULE_DIR) --wheel-dir ./dist
-	  create --version $(version) --branch $(branch) $< | tee $@
-	release --force upload | tee -a $*
+	$(RELEASE) create --force | tee $@
+	$(RELEASE) upload --force | tee -a $*
 
 ## create a github release from the current version
 release: dist/$(project)-$(version)-release.json
