@@ -2,7 +2,7 @@
 
 """Tests for `github_release_tool` package."""
 
-from logging import debug, info
+from logging import debug
 
 import pytest
 from click.testing import CliRunner
@@ -46,20 +46,3 @@ def test_cli():
     result = runner.invoke(cli, ["--help"])
     assert result.exit_code == 0, result
     assert "Show this message and exit." in result.output, result
-
-
-def test_cli_list(runner):
-    ret = runner("list")
-    info(ret)
-    ret = runner("-l list")
-    info(ret)
-
-
-def test_cli_latest(runner):
-    runner("latest")
-    runner("-l", "latest")
-
-
-def test_cli_get(runner):
-    runner("get")
-    runner("-l", "get")
