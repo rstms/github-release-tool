@@ -5,32 +5,33 @@
 # - Use 'lightweight tags'
 
 
-bumpversion = bumpversion $(1) --allow-dirty --commit --tag --current-version $(version) \
-  --search '__version__ = "{current_version}"' --replace '__version__ = "{new_version}"' \
-  $(project)/version.py
+bumpversion = bumpversion --allow-dirty $(1)
 
-# bump patch level
-bump-patch: timestamp
+## bump patch level
+bump-patch: requirements.txt timestamp
 	$(call bumpversion,patch)
+	git add requirements*.txt
 	git push
 
-# bump minor version, reset patch to zero
-bump-minor: timestamp
+## bump minor version, reset patch to zero
+bump-minor: requirements.txt timestamp
 	$(call bumpversion,minor)
+	git add requirements*.txt
 	git push
 	
-# bump version, reset minor and patch to zero
-bump-major: timestamp
+## bump version, reset minor and patch to zero
+bump-major: requirements.txt timestamp
 	$(call bumpversion,major)
+	git add requirements*.txt
 	git push
 
-# update timestamp if sources have changed
-timestamp: .timestamp 
-.timestamp: $(src) gitclean
+# update timestamp if sources have changed and rewrite requirements.txt
+timestamp: gitclean .timestamp
+.timestamp: $(src)
 	sed -E -i $(project)/version.py -e "s/(.*__timestamp__.*=).*/\1 \"$$(date --rfc-3339=seconds)\"/"
 	git add $(project)/version.py
 	@touch $@
-	@echo "Timestamp Updated."
+	@echo "Updated version.py timestamp and requirements.txt"
 
 # clean up version tempfiles
 version-clean:
