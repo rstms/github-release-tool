@@ -24,6 +24,7 @@ help:
 	tbl | groff  -T utf8 | awk 'NF';
 
 # break with an error if there are uncommited changes
+.PHONY: gitclean
 gitclean:
 	$(if $(shell git status --porcelain),$(error "git status dirty, commit and push first"))
 
