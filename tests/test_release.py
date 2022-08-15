@@ -33,6 +33,6 @@ def test_latest(test_release):
 
 
 def test_remote_latest(test_release):
-    release=test_release(remote=True)
+    release = test_release(remote=True)
     ret = release.latest_release_version()
     assert ret in [None, str]

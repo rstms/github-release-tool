@@ -40,4 +40,3 @@ def test_cli():
     result = runner.invoke(cli, ["--help"])
     assert result.exit_code == 0, result
     assert "Show this message and exit." in result.output, result
-

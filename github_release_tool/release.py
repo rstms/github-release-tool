@@ -23,10 +23,10 @@ class Release:
         self.json_pattern = re.compile(JSON_PATTERN)
         self.gh = github3.GitHub(token=token)
         if not isinstance(self.gh, github3.GitHub):
-            raise RuntimeError('GitHub login failed')
+            raise RuntimeError("GitHub login failed")
         self.repo = self.gh.repository(org, project)
         if not isinstance(self.repo, github3.repos.repo.Repository):
-            raise RuntimeError('GitHub repo lookup')
+            raise RuntimeError("GitHub repo lookup")
         self.repo_root = Path(repo_root)
         self.dist_dir = self.repo_root / "dist"
         self.remote = remote
