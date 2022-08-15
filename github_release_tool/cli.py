@@ -60,14 +60,14 @@ def output_setup(_json=True, _compact=False, _func=print):
     "-o",
     "--org",
     type=str,
-    envvar="GITHUB_ORG",
+    envvar="GITHUB_ORGANIZATION",
     show_envvar=True,
 )
 @click.option(
     "-p",
     "--project",
     type=str,
-    envvar="PROJECT",
+    envvar="GITHUB_REPO",
     show_envvar=True,
     help="github repo name",
 )
@@ -99,7 +99,10 @@ def cli(ctx, debug, json, compact, **kwargs):
 
     sys.excepthook = exception_handler
 
+    # support some alternatives for env vars
     kwargs.setdefault("token", os.environ["GITHUB_TOKEN"])
+    kwargs.setdefault("project", os.environ["PROJECT"])
+
     ctx.obj = Release(**kwargs)
     ctx.obj.output = output_setup(json, compact, click.echo)
 
