@@ -180,6 +180,7 @@ class Release:
         asset = asset.resolve()
 
         content_type = content_type or "application/binary"
+        name = asset.name
 
         if verify:
             verify(
@@ -187,14 +188,16 @@ class Release:
                     release=release.tag_name,
                     content_type=content_type,
                     label=label,
-                    asset=str(asset),
+                    name=name,
+                    local_file=str(asset),
                 )
             )
+
 
         with asset.open("rb") as ifp:
             response = release.upload_asset(
                 content_type=content_type,
-                name=ifp.name,
+                name=name,
                 asset=ifp,
                 label=label,
             )
