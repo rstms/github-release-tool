@@ -3,9 +3,9 @@
 # create distributable files if sources have changed
 
 .PHONY: dist 
-dist: gitclean tox .dist 
+dist: .dist 
 
-.dist:
+.dist: gitclean tox
 	@echo Building $(project)
 	flit build
 	@touch $@
