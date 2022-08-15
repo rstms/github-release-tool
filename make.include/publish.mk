@@ -1,28 +1,4 @@
-# publish - build package and publish
-
-# create distributable files if sources have changed
-.PHONY: dist 
-dist: .dist
-.dist:	gitclean tox
-	@echo Building $(project)
-	pip wheel -w dist .
-	@touch $@
-
-release_args = '{\
-  "tag_name": "v$(version)",\
-  "target_commitish": "$(branch)",\
-  "name": "v$(version)",\
-  "body": "Release of version $(version)",\
-  "draft": false,\
-  "prerelease": false\
-}'
-release_url = https://api.github.com/repos/$(organization)/$(project)/releases
-release_header = -H 'Authorization: token ${GITHUB_TOKEN}'
-
-# create a github release from the current version
-release: dist 
-	@echo pushing Release $(project) v$(version) to github...
-	curl $(release_header) --data $(release_args) $(release_url)
+# publish - publish to pypi
 
 # publish to pypi
 publish: release
