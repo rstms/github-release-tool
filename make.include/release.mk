@@ -26,8 +26,9 @@ release: .release
 
 .release: dist
 	@echo pushing Release $(project) v$(version) to github...
-	$(RELEASE) create --force | tee dist/$(project)-$(version)-release.json
-	$(RELEASE) upload --force | tee dist/$(project)-$(version)-asset.json
+	$(call gitclean)
+	$(RELEASE) create --force >dist/$(project)-$(version)-release.json
+	$(RELEASE) upload --force >dist/$(project)-$(version)-asset.json
 	@touch $@
 
 

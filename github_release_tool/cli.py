@@ -119,6 +119,7 @@ def cli(ctx, debug, json, compact, **kwargs):
             debug_hook(exception_type, exception, traceback)
         else:
             click.echo(f"{exception_type.__name__}: {exception}", err=True)
+            sys.exit(-1)
 
     sys.excepthook = exception_handler
 
