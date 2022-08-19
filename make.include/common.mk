@@ -28,11 +28,11 @@ help:
 
 .PHONY: gitclean
 gitclean:
-	@if git status --porcelain; then \
+	@if [ -n "$(git status --porcelain)" ]; then \
+	  echo "no uncommitted changes, ready to continue..."; \
+	else \
 	  echo "git status dirty, commit and push first"; \
 	  false;\
-	else \
-	  echo "no uncommitted changes, ready to continue..."; \
 	fi
 
 
