@@ -23,19 +23,12 @@ help:
 	  {print} END{print ".TE";}' |\
 	tbl | groff  -T utf8 | awk 'NF';
 
-# break with an error if there are uncommited changes
-#@echo $(if $(shell git status --porcelain),$(error 
 
 .PHONY: gitclean
 gitclean:
 	@echo -n $(if $(shell git status --porcelain),\
-	$(error git status dirty, commit and push first"),\
-	$(info git status clean))
-
-
-testo: gitclean
-	@echo gitclean passed
-
+	    $(error git status: dirty, commit and push first),\
+	$(info git status: clean))
 
 # require user confirmation   example: $(call verify_action,do something destructive)
 define verify_action =
