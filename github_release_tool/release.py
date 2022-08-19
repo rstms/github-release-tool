@@ -39,6 +39,11 @@ class Release:
             )
         if module_dir:
             self.module_dir = Path(module_dir).resolve()
+            if not (self.module_dir / "__init__.py").is_file():
+                raise RuntimeError(
+                    f"module_dir '{str(module_dir)}'"
+                    " does not appear to be a python module"
+                )
         else:
             self.module_dir = None
         self.wheel_dir = Path(wheel_dir).resolve()
@@ -48,13 +53,17 @@ class Release:
         else:
             self.version = self._check_version(version)
 
-    def _check_version(self, v):
+    def _check_version(self, v, return_none=False):
         if v is not None:
             if v.startswith("v"):
                 v = v[1:]
             if not self.version_pattern.match(v):
+                if return_none:
+                    return None
                 raise SyntaxError(f"unrecognized version format '{v}'")
         if not isinstance(v, str):
+            if return_none:
+                return None
             raise TypeError(f"expected string-type, got '{v}'")
         return v
 
@@ -91,7 +100,7 @@ class Release:
                 versions = self._sort_versions(versions)
                 ret = versions[-1]
         else:
-            releases = self.repo.releases()
+            releases = self._validated_releases(self.repo.releases())
             if len(list(releases)):
                 release = self.repo.latest_release()
                 if release:
@@ -99,6 +108,13 @@ class Release:
         if ret:
             ret = self._check_version(ret)
 
+        return ret
+
+    def _validated_releases(self, releases):
+        ret = []
+        for r in list(releases):
+            if self._check_version(r.tag_name, return_none=True):
+                ret.append(r)
         return ret
 
     def get_release_data(self):
@@ -123,7 +139,8 @@ class Release:
             ret = self.local_release_versions()
         else:
             ret = [
-                self._check_version(r.tag_name) for r in self.repo.releases()
+                self._check_version(r.tag_name)
+                for r in self._validated_releases(self.repo.releases())
             ]
 
         if sorted:
@@ -141,9 +158,13 @@ class Release:
 
         ret = None
 
-        version = kwargs.pop(
-            "version", self.latest_release_version(local=True)
-        )
+        if "tag_name" in kwargs:
+            version = self._check_version(kwargs["tag_name"])
+            kwargs.pop("version", None)
+        else:
+            version = kwargs.pop(
+                "version", self.latest_release_version(local=True)
+            )
 
         kwargs.setdefault("tag_name", f"v{version}")
         kwargs.setdefault("target_commitish", self.get_current_branch())
