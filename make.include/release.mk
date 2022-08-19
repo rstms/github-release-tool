@@ -5,7 +5,7 @@
 .PHONY: dist 
 dist: .dist
 
-.dist: tox
+.dist: dist/*.whl tox
 	$(call gitclean)
 	@echo Building $(project)
 	flit build
