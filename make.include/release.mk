@@ -3,9 +3,9 @@
 # create distributable files if sources have changed
 
 .PHONY: dist 
-dist: .dist
+dist: .dist tox
 
-.dist: dist/*.whl tox
+.dist:	$(src)
 	$(call gitclean)
 	@echo Building $(project)
 	flit build
@@ -24,7 +24,7 @@ RELEASE = release\
 .PHONY: release
 release: .release
 
-.release: dist
+.release: dist/*.whl
 	@echo pushing Release $(project) v$(version) to github...
 	$(call gitclean)
 	$(RELEASE) create --force >dist/$(project)-$(version)-release.json
