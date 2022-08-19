@@ -26,8 +26,9 @@ bump-major: requirements.txt timestamp
 	git push
 
 # update timestamp if sources have changed and rewrite requirements.txt
-timestamp: gitclean .timestamp
+timestamp: .timestamp
 .timestamp: $(src)
+	$(call gitclean)
 	sed -E -i $(project)/version.py -e "s/(.*__timestamp__.*=).*/\1 \"$$(date --rfc-3339=seconds)\"/"
 	git add $(project)/version.py
 	@touch $@
