@@ -24,11 +24,11 @@ help:
 	tbl | groff  -T utf8 | awk 'NF';
 
 # break with an error if there are uncommited changes
-#@echo $(if $(shell git status --porcelain),$(error "git status dirty, commit and push first"))
+#@echo $(if $(shell git status --porcelain),$(error 
 
 .PHONY: gitclean
 gitclean:
-	@git status --porcelain && false
+	@[ "$(git status --porcelain)" ] || echo >&2 "git status dirty, commit and push first"; exit 1
 
 
 testo: gitclean
