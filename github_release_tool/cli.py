@@ -59,7 +59,7 @@ class CustomGroup(click.Group):
     help="select release version tag",
 )
 @click.option(
-    "-t", "--token", type=str, envvar="GITHUB_DEPLOY_TOKEN", show_envvar=True
+    "-t", "--token", type=str, envvar="GITHUB_TOKEN", show_envvar=True
 )
 @click.option(
     "-o",
