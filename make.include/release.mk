@@ -3,7 +3,7 @@
 # create distributable files if sources have changed
 
 .PHONY: dist 
-dist: .dist tox
+dist: tox .dist
 
 .dist:	$(src)
 	$(call gitclean)
