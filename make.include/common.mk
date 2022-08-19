@@ -26,7 +26,7 @@ help:
 # break with an error if there are uncommited changes
 .PHONY: gitclean
 gitclean:
-	$(if $(shell git status --porcelain),$(error "git status dirty, commit and push first"),git status --short)
+	@$(if $(shell git status --porcelain),$(error "git status dirty, commit and push first"),git status --short)
 
 
 # require user confirmation   example: $(call verify_action,do something destructive)
