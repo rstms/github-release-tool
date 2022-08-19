@@ -28,11 +28,11 @@ help:
 
 .PHONY: gitclean
 gitclean:
-	echo $(if $(shell git status --porcelain),$(error git status dirty, commit and push first"),$(info no uncommitted changes))
+	@echo $(if $(shell git status --porcelain),$(error git status dirty, commit and push first"),$(info no uncommitted changes))
 
 
 testo: gitclean
-	echo gitclean passed
+	@echo gitclean passed
 
 
 # require user confirmation   example: $(call verify_action,do something destructive)
