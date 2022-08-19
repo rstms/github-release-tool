@@ -29,7 +29,7 @@ testls:
 
 # test with tox if sources have changed
 .PHONY: tox
-tox: .tox 
+tox: .tox gitclean
 .tox: $(python_src) tox.ini
 	tox
 	@touch $@
