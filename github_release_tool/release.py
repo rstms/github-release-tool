@@ -212,7 +212,9 @@ class Release:
         release = self._get_repo_release()
         return [asset.as_dict() for asset in release.assets()]
 
-    def download_assets(self, _id=None, regex=None, path=Path('.'), dry_run=False):
+    def download_assets(
+        self, _id=None, regex=None, path=Path("."), dry_run=False
+    ):
         """download the assets from the selected remote release"""
         ret = []
         path = path.resolve()
