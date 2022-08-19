@@ -37,8 +37,10 @@ class Release:
             raise RuntimeError(
                 f"repo lookup failed: {organization}/{repository}"
             )
-        self.module_dir = Path(module_dir).resolve()
-        self.module = self.module_dir.name
+        if module_dir:
+            self.module_dir = Path(module_dir).resolve()
+        else:
+            self.module_dir = None
         self.wheel_dir = Path(wheel_dir).resolve()
         self.local = local
         if version in [None, "latest"]:
@@ -210,7 +212,7 @@ class Release:
         release = self._get_repo_release()
         return [asset.as_dict() for asset in release.assets()]
 
-    def download_assets(self, _id, regex, path, dry_run):
+    def download_assets(self, _id=None, regex=None, path=Path('.'), dry_run=False):
         """download the assets from the selected remote release"""
         ret = []
         path = path.resolve()

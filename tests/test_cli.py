@@ -5,6 +5,8 @@
 from logging import debug
 
 import pytest
+import os
+
 from click.testing import CliRunner
 
 import github_release_tool
@@ -46,3 +48,17 @@ def test_cli():
     result = runner.invoke(cli, ["--help"])
     assert result.exit_code == 0, result
     assert "Show this message and exit." in result.output, result
+
+def test_cli_latest_remote():
+    os.environ.pop('MODULE_DIR', None)
+    runner = CliRunner()
+    result = runner.invoke(cli, ["latest"])
+    assert not result.exception
+    assert result.exit_code == 0, result
+
+def test_cli_latest_local():
+    os.environ.pop('MODULE_DIR', None)
+    runner = CliRunner()
+    result = runner.invoke(cli, ["-l", "latest"])
+    assert result.exception
+    assert "MODULE_DIR is not a directory" in result.output

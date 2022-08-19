@@ -28,8 +28,15 @@ def output_setup(_json=True, _compact=False, _func=print):
 
     return _output
 
+class CustomGroup(click.Group):
+    def get_help(self, *args, **kwargs):
+        help_str = super().get_help(*args, **kwargs)
+        help_list = help_str.split('\n')
+        help_list[2] += f" v{__version__}"
+        return '\n'.join(help_list)
 
-@click.group("release")
+
+@click.group(name="release", cls=CustomGroup)
 @click.option("-d", "--debug", is_flag=True, help="debug mode")
 @click.option(
     "-j/-J",
@@ -100,6 +107,10 @@ def output_setup(_json=True, _compact=False, _func=print):
 def cli(ctx, debug, json, compact, **kwargs):
     """github release tool"""
 
+    if kwargs['local']:
+        if kwargs['module_dir'] is None or not kwargs['module_dir'].is_dir():
+            ctx.fail('MODULE_DIR is not a directory')
+
     def exception_handler(
         exception_type, exception, traceback, debug_hook=sys.excepthook
     ):
@@ -112,11 +123,6 @@ def cli(ctx, debug, json, compact, **kwargs):
 
     ctx.obj = Release(**kwargs)
     ctx.obj.output = output_setup(json, compact, click.echo)
-
-
-def _fail(msg):
-    click.echo(f"failed: {msg}", err=True)
-    sys.exit(1)
 
 
 @cli.command()
