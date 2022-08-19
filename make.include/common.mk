@@ -26,9 +26,7 @@ help:
 
 .PHONY: gitclean
 gitclean:
-	@echo -n $(if $(shell git status --porcelain),\
-	    $(error git status: dirty, commit and push first),\
-	$(info git status: clean))
+	@echo $(if $(shell git status --porcelain),$(error git status: dirty, commit and push first),);
 
 # require user confirmation   example: $(call verify_action,do something destructive)
 define verify_action =
