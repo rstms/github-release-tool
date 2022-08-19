@@ -3,9 +3,9 @@
 # create distributable files if sources have changed
 
 .PHONY: dist 
-dist: .dist gitclean tox
+dist: .dist
 
-.dist:
+.dist: gitclean tox
 	@echo Building $(project)
 	#$(MAKE) gitclean
 	#$(MAKE) tox
@@ -23,9 +23,9 @@ RELEASE = release\
 
 ## create a github release from the current version
 .PHONY: release
-release: .release dist
+release: .release
 
-.release:
+.release: dist
 	@echo pushing Release $(project) v$(version) to github...
 	$(RELEASE) create --force | tee dist/$(project)-$(version)-release.json
 	$(RELEASE) upload --force | tee dist/$(project)-$(version)-asset.json
