@@ -13,7 +13,7 @@ dist: .dist
 RELEASE = release\
   --organization $(organization)\
   --repository $(repo)\
-  --token $(GITHUB_DEPLOY_TOKEN)\
+  --token $(GITHUB_TOKEN)\
   --module-dir $(MODULE_DIR)\
   --wheel-dir ./dist\
   --version $(version) 
