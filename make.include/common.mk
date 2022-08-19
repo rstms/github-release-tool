@@ -28,7 +28,7 @@ help:
 
 .PHONY: gitclean
 gitclean:
-	echo $(if $$(git status --porcelain),$(error git status dirty, commit and push first"),$(info no uncommitted changes))
+	echo $(if $(shell git status --porcelain),$(error git status dirty, commit and push first"),$(info no uncommitted changes))
 
 
 testo: gitclean
