@@ -5,7 +5,8 @@
 .PHONY: dist 
 dist: .dist
 
-.dist: gitclean tox
+.dist: tox
+	$(call gitclean)
 	@echo Building $(project)
 	flit build
 	@touch $@

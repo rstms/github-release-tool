@@ -24,9 +24,9 @@ help:
 	tbl | groff  -T utf8 | awk 'NF';
 
 
-.PHONY: gitclean
-gitclean:
-	@echo $(if $(shell git status --porcelain),$(error git status: dirty, commit and push first),);
+define gitclean =
+	$(if $(shell git status --porcelain),$(error git status: dirty, commit and push first))
+endef
 
 # require user confirmation   example: $(call verify_action,do something destructive)
 define verify_action =
