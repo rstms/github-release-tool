@@ -31,6 +31,7 @@ testls:
 .PHONY: tox
 tox: .tox 
 .tox: $(python_src) tox.ini
+	$(call gitclean)
 	tox
 	@touch $@
 

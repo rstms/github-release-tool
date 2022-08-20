@@ -22,7 +22,7 @@ RELEASE = release\
 
 ## create a github release from the current version
 .PHONY: release
-release: .release
+release: dist .release
 
 .release: dist/*.whl
 	@echo pushing Release $(project) v$(version) to github...

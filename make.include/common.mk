@@ -25,7 +25,7 @@ help:
 
 
 define gitclean =
-	$(if $(shell git status --porcelain),$(error git status: dirty, commit and push first))
+	$(if $(and $(if $(DIRTY),,1),$(shell git status --porcelain)),$(error git status: dirty, commit and push first))
 endef
 
 # require user confirmation   example: $(call verify_action,do something destructive)
