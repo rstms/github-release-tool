@@ -102,12 +102,13 @@ class Release:
         else:
             releases = self._validated_releases(self.repo.releases())
             if len(list(releases)):
-                release = self.repo.latest_release()
-                if release:
-                    ret = release.tag_name
+                versions = self._sort_versions(
+                    [self._check_version(r.tag_name) for r in releases]
+                )
+                if len(versions):
+                    ret = versions[-1]
         if ret:
             ret = self._check_version(ret)
-
         return ret
 
     def _validated_releases(self, releases):
