@@ -24,11 +24,16 @@ RELEASE = release\
 .PHONY: release
 release: dist .release
 
+release_status=dist/$(project)-$(version)-release.json
+asset_status=dist/$(project)-$(version)-asset.json
+
 .release: dist/*.whl
 	@echo pushing Release $(project) v$(version) to github...
 	$(call gitclean)
-	$(RELEASE) create --force >dist/$(project)-$(version)-release.json
-	$(RELEASE) upload --force >dist/$(project)-$(version)-asset.json
+	$(RELEASE) create --force >$(release_status)
+	cat $(release_status)
+	$(RELEASE) upload --force >$(asset_status)
+	cat $(asset_status)
 	@touch $@
 
 
