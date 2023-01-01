@@ -32,6 +32,6 @@ testls:
 tox: .tox 
 .tox: $(python_src) tox.ini
 	$(call gitclean)
-	[ -n "$DISABLE_TOX" ] && echo 'tox disabled' || tox
+	[ -n "$${DISABLE_TOX}" ] && echo 'tox disabled' || tox
 	@touch $@
 
