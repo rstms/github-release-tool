@@ -46,7 +46,7 @@ class Release:
                 )
         else:
             self.module_dir = None
-        self.wheel_dir = Path(wheel_dir).resolve()
+        self.wheel_dir = wheel_dir
         self.local = local
         if version in [None, "latest"]:
             self.version = self.latest_release_version()
@@ -73,6 +73,13 @@ class Release:
             pattern = self.wheel_pattern
         else:
             pattern = self.json_pattern
+
+        self.wheel_dir = Path(self.wheel_dir).resolve()
+
+        if not self.wheel_dir.is_dir():
+            raise RuntimeError(
+                    f"WHEEL_DIR is not a directory"
+            )
 
         ret = {}
         for _file in [e for e in self.wheel_dir.iterdir() if e.is_file()]:

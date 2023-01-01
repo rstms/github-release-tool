@@ -80,9 +80,7 @@ class CustomGroup(click.Group):
 @click.option(
     "-m",
     "--module-dir",
-    type=click.Path(
-        exists=True, file_okay=False, writable=True, path_type=Path
-    ),
+    type=click.Path(file_okay=False, writable=True, path_type=Path),
     envvar="MODULE_DIR",
     show_envvar=True,
     help="python module directory",
@@ -91,7 +89,7 @@ class CustomGroup(click.Group):
     "-w",
     "--wheel-dir",
     type=click.Path(
-        exists=True, file_okay=False, writable=True, path_type=Path
+        dir_okay=True, file_okay=False, writable=True, path_type=Path
     ),
     envvar="WHEEL_DIR",
     default="./dist",
