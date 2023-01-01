@@ -77,7 +77,9 @@ class Release:
         self.wheel_dir = Path(self.wheel_dir).resolve()
 
         if not self.wheel_dir.is_dir():
-            raise RuntimeError(f"WHEEL_DIR {str(self.wheel_dir)} is not a directory")
+            raise RuntimeError(
+                f"WHEEL_DIR {str(self.wheel_dir)} is not a directory"
+            )
 
         ret = {}
         for _file in [e for e in self.wheel_dir.iterdir() if e.is_file()]:
