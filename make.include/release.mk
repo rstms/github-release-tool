@@ -3,7 +3,7 @@
 # create distributable files if sources have changed
 
 .PHONY: dist 
-dist: tox .dist
+dist: $(if $(DISABLE_TOX),,tox) .dist
 
 .dist:	$(src)
 	$(call gitclean)
