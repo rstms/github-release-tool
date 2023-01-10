@@ -15,7 +15,9 @@ def module_dir():
 
 @pytest.fixture
 def wheel_dir():
-    return Path(".").resolve() / "dist"
+    ret = Path(".").resolve() / "dist"
+    ret.mkdir(exist_ok=True)
+    return ret
 
 
 @pytest.fixture

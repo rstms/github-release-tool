@@ -1,8 +1,8 @@
-attr==0.3.2
-black==22.3.0
-bump2version==1.0.1
-coverage==6.4.1
-flake8==4.0.1
-pytest==7.1.2
-python-box==6.0.2
-tox==3.25.0
+black
+bump2version
+coverage
+flake8
+pytest
+pdbpp
+python-box
+tox

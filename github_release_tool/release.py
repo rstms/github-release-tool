@@ -3,6 +3,7 @@
 # vi: ft=python
 
 import json
+import os
 import re
 from pathlib import Path
 from subprocess import check_output
@@ -18,14 +19,19 @@ class Release:
     def __init__(
         self,
         *,
-        organization,
-        repository,
-        token,
-        module_dir,
-        wheel_dir,
+        organization=None,
+        repository=None,
+        token=None,
+        module_dir=None,
+        wheel_dir=None,
         version=None,
         local=False,
     ):
+        organization = organization or os.environ["GITHUB_ORGANIZATION"]
+        repository = repository or os.environ.get(
+            "GITHUB_REPO", Path(".").resolve().stem
+        )
+        token = token or os.environ["GITHUB_TOKEN"]
         self.version_pattern = re.compile(VERSION_PATTERN)
         self.wheel_pattern = re.compile(WHEEL_PATTERN)
         self.json_pattern = re.compile(JSON_PATTERN)
@@ -46,7 +52,7 @@ class Release:
                 )
         else:
             self.module_dir = None
-        self.wheel_dir = wheel_dir
+        self.wheel_dir = wheel_dir or Path("./dist").resolve()
         self.local = local
         if version in [None, "latest"]:
             self.version = self.latest_release_version()
@@ -74,7 +80,7 @@ class Release:
         else:
             pattern = self.json_pattern
 
-        self.wheel_dir = Path(self.wheel_dir).resolve()
+        self.wheel_dir = self.wheel_dir or Path("./dist").resolve()
 
         if not self.wheel_dir.is_dir():
             raise RuntimeError(

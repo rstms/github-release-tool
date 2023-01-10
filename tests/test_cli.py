@@ -52,7 +52,7 @@ def test_cli():
 def test_cli_latest_remote():
     os.environ.pop("MODULE_DIR", None)
     runner = CliRunner()
-    result = runner.invoke(cli, ["latest"])
+    result = runner.invoke(cli, ["latest"], catch_exceptions=False)
     assert not result.exception
     assert result.exit_code == 0, result
 

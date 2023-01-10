@@ -92,7 +92,6 @@ class CustomGroup(click.Group):
         dir_okay=True, file_okay=False, writable=True, path_type=Path
     ),
     envvar="WHEEL_DIR",
-    default="./dist",
     show_envvar=True,
     help="wheel directory (usually ./dist)",
 )
