@@ -196,7 +196,7 @@ class Release:
 
     def _get_wheel(self):
         wheel = self.local_release_files(wheel=True)[self.version]
-        wheel = wheel.resolve()
+        wheel = Path(wheel).resolve()
         return wheel
 
     def _get_repo_release(self):
@@ -214,7 +214,7 @@ class Release:
 
         if not asset:
             asset = self._get_wheel()
-        asset = asset.resolve()
+        asset = Path(asset).resolve()
 
         content_type = content_type or "application/binary"
         name = asset.name
@@ -252,7 +252,7 @@ class Release:
     ):
         """download the assets from the selected remote release"""
         ret = []
-        path = path.resolve()
+        path = Path(path).resolve()
         release = self._get_repo_release()
         for asset in release.assets():
             if _id and asset.id != _id:
