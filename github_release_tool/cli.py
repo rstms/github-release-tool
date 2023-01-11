@@ -150,19 +150,22 @@ def assets(ctx):
 
 @cli.command()
 @click.pass_context
-@click.option("-i", "--id", "_id", type=int)
-@click.option("-r", "--regex", type=str)
-@click.option("-d", "--dry-run", is_flag=True)
+@click.option("-i", "--id", "_id", type=int, help="identify asset by id")
+@click.option("-r", "--regex", type=str, help="filter asset filenames")
+@click.option(
+    "-d", "--dry-run", is_flag=True, help="simulate action and report"
+)
+@click.option("-u", "--update", is_flag=True, help="delete old versions")
 @click.argument(
     "path",
     type=click.Path(
         exists=True, file_okay=False, writable=True, path_type=Path
     ),
 )
-def download_asset(ctx, _id, regex, path, dry_run):
+def download_asset(ctx, _id, regex, path, dry_run, update):
     """download asset with id to path"""
     r = ctx.obj
-    return r.output(r.download_assets(_id, regex, path, dry_run))
+    return r.output(r.download_assets(_id, regex, path, dry_run, update))
 
 
 @cli.command()

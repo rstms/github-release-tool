@@ -248,9 +248,9 @@ class Release:
         return [asset.as_dict() for asset in release.assets()]
 
     def download_assets(
-        self, _id=None, regex=None, path=Path("."), dry_run=False
+        self, _id=None, regex=None, path=Path("."), dry_run=False, update=False
     ):
-        """download the assets from the selected remote release"""
+        """download the assets, filter name by regex, optionally deleting old versions"""
         ret = []
         path = Path(path).resolve()
         release = self._get_repo_release()
@@ -263,10 +263,24 @@ class Release:
             if dry_run:
                 result = asset_path
             else:
+                if update:
+                    self.delete_old_versions(asset, path)
                 result = asset.download(asset_path)
             ret.append(str(result))
 
         return ret
+
+    def delete_old_versions(self, asset, path):
+        """delete old versions of the asset"""
+        suffix = Path(asset.name).suffix
+        basename = asset.name.split("-")[0]
+        files = filter(lambda f: f.is_file(), path.iterdir())
+        asset_files = filter(lambda f: f.suffix == suffix, files)
+        for asset_file in asset_files:
+            file_base, file_version = asset_file.name.split("-")[:2]
+            if file_base == basename:
+                if file_version != self.version:
+                    asset_file.unlink()
 
     def download_file(self, repo_path, output_file):
         """download the contents of a repo file and write to output_file"""

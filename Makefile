@@ -16,5 +16,6 @@ dev: uninstall
 # remove all build, test, coverage and Python artifacts
 clean: 
 	for clean in $(call included,clean); do ${MAKE} $$clean; done
+	rm -f .pyproject.toml.*
 
 include $(wildcard make.include/*.mk)

@@ -110,3 +110,4 @@ ENV/
 .release
 .timestamp
 postactivate
+.lint

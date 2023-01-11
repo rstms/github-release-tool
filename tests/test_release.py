@@ -166,6 +166,38 @@ def test_release_local_release_versions(mkrelease):
     info(ret)
 
 
+def test_release_download_assets(mkrelease, shared_datadir):
+    r = mkrelease()
+    dist = shared_datadir / "dist"
+    dist.mkdir()
+    ret = r.download_assets(regex=r".*.whl", path=dist)
+    assert isinstance(ret, list)
+    assert len(ret) == 1
+    assert len(list(dist.iterdir())) == 1
+    assert isinstance(ret[0], str)
+    assert ret[0].endswith(".whl")
+
+
+def test_release_update_assets(mkrelease, shared_datadir):
+    release_versions = mkrelease().list_release_versions()
+    dist = shared_datadir / "dist"
+    dist.mkdir()
+    for version in release_versions[-4:]:
+        r = mkrelease(version=version)
+        ret = r.download_assets(regex=r".*.whl", path=dist)
+        assert isinstance(ret, list)
+        assert len(ret) == 1
+    assert len(list(dist.iterdir())) == 4
+
+    r = mkrelease()
+    ret = r.download_assets(regex=r".*.whl", path=dist, update=True)
+    assert isinstance(ret, list)
+    assert len(ret) == 1
+    assert isinstance(ret[0], str)
+    assert ret[0].endswith(".whl")
+    assert len(list(dist.iterdir())) == 1
+
+
 """
 
 
